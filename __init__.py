@@ -1,4 +1,5 @@
 import pygame as pg
+import math
 from vector import *
 from rgb import *
 from errors import *
@@ -53,6 +54,38 @@ class window:
         if y < 0 or y > self.pixel_size.y:
             raise outOfBoundsError(y,0,self.pixel_size.y)
         self.pixels[x][y] = color
+    def draw_circle(self,color:Color,x:int,y:int,radius:int):
+        if x - radius < 0 or x + radius > self.pixel_size.x:
+            raise outOfBoundsError(x,0,self.pixel_size.x)
+        if y - radius < 0 or y + radius > self.pixel_size.y:
+            raise outOfBoundsError(y,0,self.pixel_size.y)
+        for r in range(radius + 1):
+            for i in range(360):
+                newx = int(math.cos(math.radians(i)) * r) + x
+                newy = int(math.sin(math.radians(i)) * r) + y
+                self.pixels[newx][newy] = color
+    def draw_poly(self, color: Color, x: int, y: int, points: int, size: int, angle: int = 0):
+        """Broken and I just cannot fix this RN :("""
+        # Check if the polygon is within the bounds
+        if x - size < 0 or x + size > self.pixel_size.x:
+            raise outOfBoundsError(x, 0, self.pixel_size.x)
+        if y - size < 0 or y + size > self.pixel_size.y:
+            raise outOfBoundsError(y, 0, self.pixel_size.y)
+
+        # Draw the polygon by connecting lines between calculated points
+        for r in range(size):  # Draw concentric polygons based on size
+            for i in range(points):
+                # Calculate the current point (x1, y1)
+                x1 = int(math.cos(math.radians(360 * (i / points) + angle)) * r) + x
+                y1 = int(math.sin(math.radians(360 * (i / points) + angle)) * r) + y
+                
+                # Calculate the next point (x2, y2)
+                x2 = int(math.cos(math.radians(360 * ((i + 1) / points) + angle)) * r) + x
+                y2 = int(math.sin(math.radians(360 * ((i + 1) / points) + angle)) * r) + y
+                
+                # Draw the line between the two points
+                self.draw_line(color, x1, y1, x2, y2)
+        
     def clear_screen(self,bgcolor:Color):
         self.pixels = [[bgcolor for x in range(self.pixel_size.y)] for y in range(self.pixel_size.x)]
     def update(self):
